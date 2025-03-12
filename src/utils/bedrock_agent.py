@@ -37,6 +37,7 @@ from src.utils.bedrock_agent_helper import AgentsForAmazonBedrock
 import json
 
 print(f"boto3 version: {boto3.__version__}")
+boto3.setup_default_session(profile_name="lhbank-poc-aws")
 
 # Clients
 s3_client = boto3.client("s3")
@@ -52,16 +53,21 @@ account_id = sts_client.get_caller_identity()["Account"]
 suffix = f"{region}-{account_id}"
 bucket_name = f"mac-workshop-{suffix}"
 agent_foundation_models = [
-    "us.anthropic.claude-3-haiku-20240307-v1:0",
-    "us.anthropic.claude-3-sonnet-20240307-v1:0",
-    "us.anthropic.claude-3-5-sonnet-20240620-v1:0",
-    "us.anthropic.claude-3-5-haiku-20241022-v1:0",
-    "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    # "us.anthropic.claude-3-haiku-20240307-v1:0",
+    # "us.anthropic.claude-3-sonnet-20240307-v1:0",
+    # "us.anthropic.claude-3-5-sonnet-20240620-v1:0",
+    # "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    # "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "us.amazon.nova-pro-v1:0",
+    "us.amazon.nova-lite-v1:0"
+    "us.amazon.nova-micro-v1:0"
 ]
 
 # DEFAULT_AGENT_MODEL = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
-DEFAULT_AGENT_MODEL = "us.anthropic.claude-3-5-sonnet-20240620-v1:0"
-DEFAULT_SUPERVISOR_MODEL = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+# DEFAULT_AGENT_MODEL = "us.anthropic.claude-3-5-sonnet-20240620-v1:0"
+# DEFAULT_SUPERVISOR_MODEL = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+DEFAULT_AGENT_MODEL = "us.amazon.nova-pro-v1:0"
+DEFAULT_SUPERVISOR_MODEL = "us.amazon.nova-pro-v1:0"
 
 # "us.anthropic.claude-3-5-sonnet-20240620-v1:0"
 # "us.anthropic.claude-3-5-sonnet-20241022-v1:0"

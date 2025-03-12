@@ -21,6 +21,7 @@ from opensearchpy import (
 import pprint
 from retrying import retry
 import random
+from typing import List
 
 valid_embedding_models = [
     "cohere.embed-multilingual-v3",
@@ -90,6 +91,7 @@ class KnowledgeBasesForAmazonBedrock:
         kb_description: str = None,
         data_bucket_name: str = None,
         embedding_model: str = "amazon.titan-embed-text-v2:0",
+        bucket_object_prefixs: str = None,
     ):
         """
         Function used to create a new Knowledge Base or retrieve an existent one
@@ -225,6 +227,25 @@ class KnowledgeBasesForAmazonBedrock:
                 kb_name,
                 kb_description,
                 bedrock_kb_execution_role,
+                # chunking_strategy_configuration={
+                #     "chunkingStrategy": "FIXED_SIZE",
+                #     "fixedSizeChunkingConfiguration": {
+                #         "maxTokens": 512,
+                #         "overlapPercentage": 20,
+                #     },
+                # }
+                chunking_strategy_configuration={
+                    "chunkingStrategy": "HIERARCHICAL",
+                    "hierarchicalChunkingConfiguration": {
+                        'levelConfigurations': [
+                            {
+                                'maxTokens': 1500
+                            },
+                        ],
+                        'overlapTokens': 60
+                    }
+                },
+                bucket_object_prefixs=bucket_object_prefixs
             )
             interactive_sleep(60)
             print(
@@ -676,6 +697,14 @@ class KnowledgeBasesForAmazonBedrock:
         kb_name: str,
         kb_description: str,
         bedrock_kb_execution_role: str,
+        chunking_strategy_configuration = {
+            "chunkingStrategy": "FIXED_SIZE",
+            "fixedSizeChunkingConfiguration": {
+                "maxTokens": 512,
+                "overlapPercentage": 20,
+            },
+        },
+        bucket_object_prefixs: List[str] = None,
     ):
         """
         Create Knowledge Base and its Data Source. If existent, retrieve
@@ -703,19 +732,25 @@ class KnowledgeBasesForAmazonBedrock:
         }
 
         # Ingest strategy - How to ingest data from the data source
-        chunking_strategy_configuration = {
-            "chunkingStrategy": "FIXED_SIZE",
-            "fixedSizeChunkingConfiguration": {
-                "maxTokens": 512,
-                "overlapPercentage": 20,
-            },
-        }
+        # chunking_strategy_configuration = {
+        #     "chunkingStrategy": "FIXED_SIZE",
+        #     "fixedSizeChunkingConfiguration": {
+        #         "maxTokens": 512,
+        #         "overlapPercentage": 20,
+        #     },
+        # }
 
         # The data source to ingest documents from, into the OpenSearch serverless knowledge base index
-        s3_configuration = {
-            "bucketArn": f"arn:aws:s3:::{bucket_name}",
-            # "inclusionPrefixes":["*.*"] # you can use this if you want to create a KB using data within s3 prefixes.
-        }
+        if bucket_object_prefix:
+            s3_configuration = {
+                "bucketArn": f"arn:aws:s3:::{bucket_name}",
+                "inclusionPrefixes": bucket_object_prefixs,
+            }
+        else:
+            s3_configuration = {
+                "bucketArn": f"arn:aws:s3:::{bucket_name}",
+                # "inclusionPrefixes":["*.*"] # you can use this if you want to create a KB using data within s3 prefixes.
+            }
 
         # The embedding model used by Bedrock to embed ingested documents, and realtime prompts
         embedding_model_arn = (
