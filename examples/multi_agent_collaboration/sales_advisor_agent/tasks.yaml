@@ -1,112 +1,48 @@
-research_task:
+finacial_extract_all_task:
   description: >
-    We are working on the following project: {project_description}.
-    Conduct research about the target customers and competitors 
-    for the new product or service, while also taking into account the new web domain name 
-    called: {web_domain}. Make sure you perform thorough research to find interesting 
-    and relevant information that will help produce the best possible marketing strategy.
-    Since you are the first step in the project, you also use the agent store to 
-    save the project description and web domain name.
+    We are working on the following project for analysis financial from {company_name}.
+    Your task is to extract all useful financial information from the provided knowledge base of the company specified by the user. 
+    Focus on gathering key financial metrics, trends, and insights such as revenue, expenses, profits, liabilities, assets, and any other relevant financial details. 
+    Ensure that all extracted data is accurate and complete without modifying or altering the original knowledge base.
+    The goal is to provide a comprehensive summary of financial details that can be used for further analysis.
   expected_output: >
-    A complete report on the target customer base and the competitors for the new 
-    product or service. Provides clarity about the customer demographics, their preferences, 
-    the market positioning versus the competition, and how the target audience gets engaged.
-    Capture the entire resarch output as json in the agent store with key 'market_research'.
-    Also the project details are saved as JSON in the agent store with key 'project_details'.
+    A detailed report containing all relevant financial information for the specified company. 
+    This includes trends in revenue, profitability, cost structure, liabilities, and assets over time. 
+    The output should be structured in a way that highlights key insights and is ready for further analysis.
+    Capture the entire extracted financial data as JSON in the agent store with the key 'financial_data'.
+    Also save the company description as JSON in the agent store with the key 'company_name'.
 
-marketing_strategy_task:
+finacial_get_external_data_task:
   description: >
-    Formulate a comprehensive marketing strategy for this project: 
-    {project_description}, which will have the new web domain name called: {web_domain}.
-    You must be given as input the entire research results that the Analyst completed 
-    for you (use the agent store for that). Use that research and add your own insights 
-    to create a high-quality strategy.
+    We are working on the following project for analysis financial from {company_name}.
+    Your task is to gather external data related to the specified company for analysis. 
+    This includes collecting information about news, trends, market conditions, and any other relevant external factors that could impact the company's financial performance or strategic decisions. 
+    Use reliable external sources such as industry reports, news outlets, and market analysis tools to ensure comprehensive coverage.
+    The goal is to provide a detailed context of external factors influencing the company without altering or interpreting the original data.
   expected_output: >
-    A detailed marketing strategy document that outlines the goals, target 
-    audience, key messages, and proposed tactics. Be sure to also identify 
-    marketing channels, and key metrics. The strategy takes into account the 
-    research from your analyst. You save the entire strategy as json 
-    in the agent store with key 'marketing_strategy'.
-
-campaign_idea_task:
-  description: >
-    Develop creative marketing campaign ideas for this project: {project_description}.
-    You must be given as input the entire research results that the Strategist completed.
-    Ensure your campaign ideas are innovative, engaging, and aligned with the  
-    marketing strategy. Be sure that at least one of the ideas is an 
-    online video ad campaign using a brief but powerful 6-second video.
-  expected_output: >
-    A list of three campaign ideas, each with a brief description and 
-    an explanation of the expected impact of the campaign. Sort them by descending order of 
-    positive impact, with the most impactful campaign first. You MUST save the list of 
-    campaign ideas as json in the agent store with key 'campaign_ideas'.
-
-copy_creation_task:
-  description: >
-    Create high-level marketing copy for each campaign idea for the project: {project_description}.
-    You must be given as input the set of campaign ideas created earlier.
-    Ensure each campaign copy is compelling, clear, and tailored to the target audience. 
-  expected_output: >
-    For each marketing campaign, output includes: a compelling title, a one line summary, 
-    and importantly adds a few paragraphs of copy. You MUST save the list (in the same order 
-    you received the ideas) of campaign copies as json in the agent store with key 'campaign_copies'.
-
-detailed_campaign_task:
-  description: >
-    Pick the first campaign idea from the set of ideas already created. This 
-    is a campaign to help with this project: {project_description}.
-    For this one campaign idea, draft a detailed Campaign Report. Be as 
-    thorough as possible.
-  expected_output: >
-    A detailed campaign report covering only the highest impact campaign idea, 
-    organized with ALL of the following MANDATORY report sections: 
-    A/ CAMPAIGN DESCRIPTION - explain the concept, the audience, the channels, and the assets.
-    B/ CAMPAIGN VALUE PROPOSITION - explain the product value propisition that is delivered to the audience.
-    C/ CAMPAIGN CALL TO ACTION - explain what the audience is supposed to do in response to this campaign.
-    D/ CAMPAIGN METRICS - explain how the effectiveness of the campaign will be measured.
-    You MUST save the report as json in the agent store with key 'detailed_campaign_report_v1'.
-
-iterative_revisions_task:
-  description: >
-    The strategist hands you the draft detailed copy for one campaign as input. 
-    You then go through {feedback_iteration_count} iterations of feedback and revisions to improve the 
-    campaign report and make it more complete. 
-    For each iteration, you ask the Creative Director to provide feedback.
-    The Director retrieves the latest version of the report AND MUST retrieve the 
-    prior feedback if this is not the first iteration. Based on those inputs 
-    (prior feedback, current report), the Director produces and MUST SAVE a new round of feedback 
-    to the agent store. The Director NEVER forgets to SAVE the feedback to the agent store.
-    The Writer retrieves the new feedback AND the prior version of the report,
-    and creates and saves a new version of the report incorporating the feedback.
-    The Writer NEVER forgets that it must retrieve not only the feedback, but ALSO the prior 
-    version of the report. Without the prior version, the Writer will not be able to 
-    incorporate the feedback into the report and will just start from scratch every time. 
-    Do this until you have produced a final version of the report that incorporates 
-    {feedback_iteration_count} rounds of feedback. To avoid potential confusion, you 
-    give each collaborator the names of the keys to use.
-    Be sure to enforce all mandatory 
-    report sections. The CEO gets upset if the report is incomplete.
-  expected_output: >
-    The final detailed Campaign Report after having incorporated {feedback_iteration_count} 
-    separate rounds of feedback to extend and improve the initial version of the report.
-    Be sure to mention the key name that was used when saving the final report in the agent store.
+    A comprehensive report summarizing all relevant external data for the specified company. 
+    This should include key trends, news highlights, market conditions, and any other significant external insights that may affect the company's financial performance or strategy. 
+    Save the entire collected data as JSON in the agent store with the key 'external_data'.
+    Also save the company description as JSON in the agent store with the key 'company_name'.
 
 final_report_output_task:
   description: >
-    The team of collaborators has done a great job! Now the humans running the actual project 
-    need a polished final report they can use as an excellent starting point to help 
-    our startup customer that is looking to go big with their new product. Give all the agent store 
-    keys for the whole project (including the feedback keys) to the Formatted Report Writer, and have them produce a formatted 
-    final report. The Formatted Report Writer is an expert at doing this. To be more efficient,
-    break up the work into multiple tasks, and have the writer write the final report in 
-    multiple parts that can be assembled offline. Since the sections are independent, feel free to write them 
-    in parallel. Name these with a 'section_' prefix (e.g., 'section_executive_summary').
-    As a final step, ask the Formatted Report Writer 
+    The team has gathered and processed financial and external data. 
+    Your task is to produce a polished final report that provides a comprehensive analysis 
+    of the company's financial situation, considering both internal metrics and external influences.
+    Provide all agent store keys for the project (including financial data, external data, and project details) 
+    to the Formatted Financial Report Writer, and have them generate a formatted final report. 
+    The Formatted Financial Report Writer is an expert at financial analysis and report generation.
+    To ensure efficiency, divide the report into multiple sections, with the writer creating 
+    individual parts that can be assembled later. These sections should be independent and 
+    can be written in parallel. Prefix each section key with 'section_' (e.g., 'section_financial_overview').
+    As a final step, instruct the Formatted Financial Report Writer 
     to retrieve a fresh copy of the markdown for each section from the agent store.
     With all the full text freshly retrieved, concatenate the sections in the correct order,
     and save the FULL and complete text (not just placeholders) to the agent store with 
     key 'complete_final_report'.
   expected_output: >
-    A formatted report saved in the agent store, the keys that its sections are stored in,
-    and the complete final report key. The complete final report is the concatenation of the 
-    FULL TEXT of all the sections in the correct order.
+    A well-structured and formatted financial report saved in the agent store, along with the keys 
+    for each of its sections, and the key for the complete final report. 
+    The complete final report should be a concatenation of the FULL TEXT of all sections in the correct order,
+    providing a holistic view of the company's financial health and external influences.

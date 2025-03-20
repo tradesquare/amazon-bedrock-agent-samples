@@ -241,6 +241,9 @@ class KnowledgeBasesForAmazonBedrock:
                             {
                                 'maxTokens': 1500
                             },
+                            {
+                                "maxTokens": 300  # Second required level
+                            }
                         ],
                         'overlapTokens': 60
                     }
@@ -741,7 +744,7 @@ class KnowledgeBasesForAmazonBedrock:
         # }
 
         # The data source to ingest documents from, into the OpenSearch serverless knowledge base index
-        if bucket_object_prefix:
+        if bucket_object_prefixs:
             s3_configuration = {
                 "bucketArn": f"arn:aws:s3:::{bucket_name}",
                 "inclusionPrefixes": bucket_object_prefixs,

@@ -14,8 +14,6 @@ import argparse
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 from src.utils.bedrock_agent import Agent, SupervisorAgent, Task, region, account_id
 from src.utils.knowledge_base_helper import KnowledgeBasesForAmazonBedrock
-from src.utils.knowledge_base_helper import KnowledgeBasesForAmazonBedrock
-
 
 kb_helper = KnowledgeBasesForAmazonBedrock()
 
@@ -24,10 +22,9 @@ task_yaml_path = os.path.join(current_dir, "tasks.yaml")
 agent_yaml_path = os.path.join(current_dir, "agents.yaml")
 
 def main(args):
-
-    kb_name = "sales-advisor-kb"
+    kb_name = "financial-advisor-kb"
     print(f"Acquiring  {kb_name} knowledge base")
-    bucket_name = 'lhblake-dev-curated'
+    bucket_name = 'lhbank-ts-dev-curated-2'
     bucket_object_prefixs = ['kb-sources/Company Data/*.*']
     kb_id, ds_id = kb_helper.create_or_retrieve_knowledge_base(
         kb_name,
@@ -48,32 +45,25 @@ def main(args):
         Agent.set_force_recreate_default(False)
     else:
         Agent.set_force_recreate_default(True)
-        Agent.delete_by_name("sales_advisor", verbose=True)
+        Agent.delete_by_name("financial_advisor", verbose=True)
     if args.clean_up == "true":
-        Agent.delete_by_name("sales_advisor", verbose=True)
-        Agent.delete_by_name("lead_market_analyst", verbose=True)
-        Agent.delete_by_name("chief_strategist", verbose=True)
-        Agent.delete_by_name("creative_director", verbose=True)
-        Agent.delete_by_name("content_writer", verbose=True)
+        Agent.delete_by_name("financial_advisor", verbose=True)
+        Agent.delete_by_name("financial_internal_analyst", verbose=True)       
+        Agent.delete_by_name("financial_external_analyst", verbose=True)
         Agent.delete_by_name("formatted_report_writer", verbose=True)
-        kb_helper.delete_kb("sales-advisor-kb", delete_s3_bucket=False)
+        kb_helper.delete_kb("financial-advisor-kb", delete_s3_bucket=False)
         
     else:
         inputs = {
-            'web_domain': args.web_domain,
-            'project_description': args.project,
+            'company_name': args.company_name,
             'feedback_iteration_count': args.iterations,
         }    
 
         with open(task_yaml_path, 'r') as file:
             task_yaml_content = yaml.safe_load(file)
 
-        research_task = Task('research_task', task_yaml_content, inputs)
-        marketing_strategy_task = Task('marketing_strategy_task', task_yaml_content, inputs)
-        campaign_idea_task =  Task('campaign_idea_task', task_yaml_content, inputs)
-        copy_creation_task = Task('copy_creation_task', task_yaml_content, inputs)
-        detailed_campaign_task = Task('detailed_campaign_task', task_yaml_content, inputs)
-        iterative_revisions_task = Task('iterative_revisions_task', task_yaml_content, inputs)
+        finacial_extract_all_task = Task('finacial_extract_all_task', task_yaml_content, inputs)
+        finacial_get_external_data_task = Task('finacial_get_external_data_task', task_yaml_content, inputs)
         final_report_output_task = Task('final_report_output_task', task_yaml_content, inputs)
             
         web_search_tool = {
@@ -154,21 +144,16 @@ def main(args):
         with open(agent_yaml_path, 'r') as file:
             agent_yaml_content = yaml.safe_load(file)
 
-        lead_market_analyst = Agent('lead_market_analyst', agent_yaml_content,
+        financial_internal_analyst = Agent('financial_internal_analyst', agent_yaml_content,
                                     tools=[web_search_tool, set_value_for_key, get_key_value])
-        chief_strategist = Agent('chief_strategist', agent_yaml_content,
+        financial_external_analyst = Agent('financial_external_analyst', agent_yaml_content,
                                     tools=[web_search_tool, set_value_for_key, get_key_value])
-        creative_director = Agent('creative_director', agent_yaml_content,
-                                  tools=[web_search_tool, set_value_for_key, get_key_value])
-        content_creator = Agent('content_writer', agent_yaml_content,
-                                  tools=[web_search_tool, set_value_for_key, get_key_value])
         formatted_report_writer = Agent('formatted_report_writer', agent_yaml_content,
                                   tools=[web_search_tool, set_value_for_key, get_key_value])
         
-        print("\n\nCreating marketing_strategy_agent as a supervisor agent...\n\n")
-        sales_advisor = SupervisorAgent("sales_advisor", agent_yaml_content,
-                                    [lead_market_analyst, chief_strategist, 
-                                    content_creator, creative_director, 
+        print("\n\nCreating financial_strategy_agent as a supervisor agent...\n\n")
+        financial_advisor = SupervisorAgent("financial_advisor", agent_yaml_content,
+                                    [financial_internal_analyst, financial_external_analyst, 
                                     formatted_report_writer], 
                                     verbose=False)
         
@@ -178,11 +163,9 @@ def main(args):
             time_before_call = datetime.datetime.now()
             print(f"time before call: {time_before_call}\n")
             try:
-                folder_name = "startup-advisor-" + str(uuid.uuid4())
-                result = sales_advisor.invoke_with_tasks([
-                                research_task, marketing_strategy_task, 
-                                campaign_idea_task, copy_creation_task, 
-                                detailed_campaign_task, iterative_revisions_task,
+                folder_name = "financial-advisor-" + str(uuid.uuid4())
+                result = financial_advisor.invoke_with_tasks([
+                                finacial_extract_all_task, finacial_get_external_data_task,
                                 final_report_output_task
                             ],
                             additional_instructions=dedent(f"""
@@ -212,29 +195,19 @@ def main(args):
 if __name__ == '__main__':
 
     default_inputs = {
-        'customer_domain': 'flyingCars.com',
-        'project_description': dedent("""
-FlyingCars wants to be the leading supplier of flying cars. 
-The project is to build an innovative marketing strategy to showcase FlyingCars' advanced 
-offerings, emphasizing ease of use, cost effectiveness, productivity, and safety. 
-Target high net worth individuals, highlighting success stories and transformative 
-potential. Be sure to include a draft for a video ad.
-"""),
+        'company_name': 'บริษัท กมลโลหะกิจ จำกัด',
         'iterations': "1"
     }    
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--recreate_agents", required=False, default='true', help="False if reusing existing agents.")
-    parser.add_argument("--web_domain", required=False, 
-                        default=default_inputs['customer_domain'],
-                        help="The web domain name for the project (e.g., AnyCompany.ai).")
+    parser.add_argument("--company_name", required=False, 
+                        default=default_inputs['company_name'],
+                        help="The company name for analysis")
     parser.add_argument("--iterations", required=False, 
                         default=default_inputs['iterations'],
-                        help="The number of rounds of feedback to use when producing the campaign report")
-    parser.add_argument("--project", required=False, 
-                        default=default_inputs['project_description'],
-                        help="The project that needs a marketing strategy.")
+                        help="The number of rounds of feedback to use when producing the analysis report")
     parser.add_argument("--trace_level", required=False, default="core", help="The level of trace, 'core', 'outline', 'all'.")
     parser.add_argument(
         "--clean_up",
